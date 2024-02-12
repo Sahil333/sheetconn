@@ -1,0 +1,18 @@
+server:
+  port: 80
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google-sheets:
+            client-id: 1048130131806-7hv8b0pnlobhlmpk5mj30jfui2nmei76.apps.googleusercontent.com
+            client-secret: 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
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/authorized/okta"
+            scope: https://www.googleapis.com/auth/spreadsheets,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile
+        provider:
+          google-sheets: 
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline
+            token-uri: https://oauth2.googleapis.com/token
