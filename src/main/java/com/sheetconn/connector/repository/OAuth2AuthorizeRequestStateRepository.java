@@ -1,13 +1,10 @@
 package com.sheetconn.connector.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-
 import com.sheetconn.connector.model.OAuth2AuthorizeRequestState;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OAuth2AuthorizeRequestStateRepository extends 
-    JpaRepository<OAuth2AuthorizeRequestState, String>, 
-    AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
-    
+// Need to be promoted to AuthorizationRequestRepository<OAuth2AuthorizationRequest> as default is SessionBased
+// which will not work in multiple server instances behind load balancer else will need sticky session enabling
+public interface OAuth2AuthorizeRequestStateRepository extends JpaRepository<OAuth2AuthorizeRequestState, String> {
+
 }

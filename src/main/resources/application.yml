@@ -1,7 +1,14 @@
 server:
-  port: 80
+  port: 3000
 
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/workbookDb
+    username: test_user
+    password: test_pwd
+  jpa:
+    hibernate:
+      ddl-auto: update
   security:
     oauth2:
       client:
@@ -10,9 +17,9 @@ spring:
             client-id: 1048130131806-7hv8b0pnlobhlmpk5mj30jfui2nmei76.apps.googleusercontent.com
             client-secret: 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
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/authorized/okta"
+            redirect-uri: "{baseUrl}/oauth/redirect/google-sheets"
             scope: https://www.googleapis.com/auth/spreadsheets,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile
         provider:
-          google-sheets: 
+          google-sheets:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline
             token-uri: https://oauth2.googleapis.com/token

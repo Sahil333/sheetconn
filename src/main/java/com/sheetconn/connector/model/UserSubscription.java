@@ -1,14 +1,12 @@
 package com.sheetconn.connector.model;
 
-import java.time.ZonedDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -18,9 +16,8 @@ public class UserSubscription {
     @Id
     private String id;
 
-    @OneToOne
-    @JoinColumn(name = "uid")
-    private User user;
+    @Column(name = "uid")
+    private String uid;
 
     @Column(name = "subscription_type")
     private Subscription subscription;
