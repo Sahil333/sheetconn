@@ -4,6 +4,7 @@ import com.sheetconn.connector.oauth.MultiConnectAuthorizationCodeTokenResponseC
 import com.sheetconn.connector.oauth.MultiConnectOAuth2AuthorizationRequestResolver;
 import com.sheetconn.connector.oauth.OAuth2AuthorizationCodeGrantFilter;
 import com.sheetconn.connector.oauth.OAuth2AuthorizationRequestRedirectFilter;
+import com.sheetconn.connector.oauth.jwt.GoogleIdTokenVerifier;
 import com.sheetconn.connector.repository.OAuth2AuthorizeRequestStateRepository;
 import com.sheetconn.connector.service.ConnectorRegistryService;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -31,7 +32,6 @@ import org.springframework.security.oauth2.client.web.HttpSessionOAuth2Authoriza
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.util.ArrayList;
@@ -47,13 +47,17 @@ public class OAuth2Config {
 
     private ConnectorRegistryService connectorRegistryService;
 
+    private GoogleIdTokenVerifier googleIdTokenVerifier;
+
     public OAuth2Config(
             ClientRegistrationConfig clientRegistrationConfig,
             OAuth2AuthorizeRequestStateRepository authorizeRequestStateRepository,
-                        ConnectorRegistryService connectorRegistryService) {
+                        ConnectorRegistryService connectorRegistryService,
+            GoogleIdTokenVerifier googleIdTokenVerifier) {
         this.clientRegistrationConfig = clientRegistrationConfig;
         this.authorizeRequestStateRepository = authorizeRequestStateRepository;
         this.connectorRegistryService = connectorRegistryService;
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
     }
 
 //    @Bean
@@ -106,7 +110,7 @@ public class OAuth2Config {
 
     @Bean
     OAuth2AuthorizationRequestResolver authorizationRequestResolver() {
-        return new MultiConnectOAuth2AuthorizationRequestResolver(this.clientRegistrationRepository(), "/oauth2/authorization", authorizeRequestStateRepository);
+        return new MultiConnectOAuth2AuthorizationRequestResolver(this.clientRegistrationRepository(), "/oauth2/authorization", authorizeRequestStateRepository, googleIdTokenVerifier);
     }
 
     @Bean
@@ -129,7 +133,8 @@ public class OAuth2Config {
                 this.clientRegistrationRepository(),
                 connectorRegistryService,
                 new OAuth2AuthorizationCodeAuthenticationProvider(this.accessTokenResponseClient()),
-                authorizeRequestStateRepository
+                authorizeRequestStateRepository,
+                googleIdTokenVerifier
         ));
         filterBean.setOrder(Integer.MAX_VALUE - 10);
         return filterBean;

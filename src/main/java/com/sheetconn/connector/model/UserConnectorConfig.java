@@ -4,25 +4,35 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class UserConnectorConfig {
 
     @Id
     private String id;
     
-    @Column(name = "uid")
-    private String uid;
+    @ManyToOne
+    @JoinColumn(name = "uid")
+    private User user;
 
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private ConnectorType type;
     
     @Column(name = "connector_config", columnDefinition = "jsonb")

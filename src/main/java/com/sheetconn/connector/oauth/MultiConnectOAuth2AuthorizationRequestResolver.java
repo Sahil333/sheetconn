@@ -1,8 +1,10 @@
 package com.sheetconn.connector.oauth;
 
 import com.sheetconn.connector.model.OAuth2AuthorizeRequestState;
+import com.sheetconn.connector.oauth.jwt.GoogleIdTokenVerifier;
 import com.sheetconn.connector.repository.OAuth2AuthorizeRequestStateRepository;
 import com.sheetconn.connector.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
@@ -53,6 +55,8 @@ public class MultiConnectOAuth2AuthorizationRequestResolver implements OAuth2Aut
 
     private final OAuth2AuthorizeRequestStateRepository authorizeRequestStateRepository;
 
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
+
     /**
      * Constructs a {@code DefaultOAuth2AuthorizationRequestResolver} using the provided
      * parameters.
@@ -62,13 +66,15 @@ public class MultiConnectOAuth2AuthorizationRequestResolver implements OAuth2Aut
      */
     public MultiConnectOAuth2AuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository,
                                                           String authorizationRequestBaseUri,
-                                                          OAuth2AuthorizeRequestStateRepository authorizeRequestStateRepository) {
+                                                          OAuth2AuthorizeRequestStateRepository authorizeRequestStateRepository,
+                                                          GoogleIdTokenVerifier googleIdTokenVerifier) {
         Assert.notNull(clientRegistrationRepository, "clientRegistrationRepository cannot be null");
         Assert.hasText(authorizationRequestBaseUri, "authorizationRequestBaseUri cannot be empty");
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.authorizationRequestMatcher = new AntPathRequestMatcher(
                 authorizationRequestBaseUri + "/{" + REGISTRATION_ID_URI_VARIABLE_NAME + "}");
         this.authorizeRequestStateRepository = authorizeRequestStateRepository;
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
     }
 
     @Override
@@ -103,6 +109,7 @@ public class MultiConnectOAuth2AuthorizationRequestResolver implements OAuth2Aut
         if (registrationId == null) {
             return null;
         }
+
         ClientRegistration clientRegistration = this.clientRegistrationRepository.findByRegistrationId(registrationId);
         if (clientRegistration == null) {
             throw new RuntimeException("Invalid Client Registration with Id: " + registrationId);
@@ -110,11 +117,10 @@ public class MultiConnectOAuth2AuthorizationRequestResolver implements OAuth2Aut
 
         OAuth2AuthorizeRequestState requestState;
         if(Objects.equals(redirectUriAction, "authorize")) {
-            String accessToken = request.getParameter("access_token");
-            String uid = JwtUtil.getSubject(accessToken);
+            Claims claims = googleIdTokenVerifier.getClaims(request.getParameter("id_token"));
             requestState = new OAuth2AuthorizeRequestState(
                     UUID.randomUUID().toString(),
-                    uid,
+                    claims.getSubject(),
                     ZonedDateTime.now()
             );
         } else {

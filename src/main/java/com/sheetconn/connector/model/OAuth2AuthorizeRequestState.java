@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "oauth2_authorize_request_state")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

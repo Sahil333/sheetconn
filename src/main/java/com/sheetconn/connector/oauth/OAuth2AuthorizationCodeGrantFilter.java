@@ -1,8 +1,10 @@
 package com.sheetconn.connector.oauth;
 
 import com.sheetconn.connector.model.OAuth2AuthorizeRequestState;
+import com.sheetconn.connector.oauth.jwt.GoogleIdTokenVerifier;
 import com.sheetconn.connector.repository.OAuth2AuthorizeRequestStateRepository;
 import com.sheetconn.connector.service.ConnectorRegistryService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +56,8 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
+    private final GoogleIdTokenVerifier idTokenVerifier;
+
     /**
      * Constructs an {@code OAuth2AuthorizationCodeGrantFilter} using the provided
      * parameters.
@@ -63,7 +67,8 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
      */
     public OAuth2AuthorizationCodeGrantFilter(ClientRegistrationRepository clientRegistrationRepository,
                                               ConnectorRegistryService connectorRegistryService, AuthenticationProvider authenticationProvider,
-                                              OAuth2AuthorizeRequestStateRepository authorizeRequestStateRepository) {
+                                              OAuth2AuthorizeRequestStateRepository authorizeRequestStateRepository,
+                                              GoogleIdTokenVerifier idTokenVerifier) {
         Assert.notNull(clientRegistrationRepository, "clientRegistrationRepository cannot be null");
         Assert.notNull(connectorRegistryService, "connectorRegistryService cannot be null");
         Assert.notNull(authenticationProvider, "authenticationManager cannot be null");
@@ -71,6 +76,7 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
         this.connectorRegistryService = connectorRegistryService;
         this.authenticationProvider = authenticationProvider;
         this.authorizeRequestStateRepository = authorizeRequestStateRepository;
+        this.idTokenVerifier = idTokenVerifier;
     }
 
     /**
@@ -156,8 +162,9 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
             return;
         }
         // get uid from state
+        String state = authenticationResult.getAuthorizationExchange().getAuthorizationRequest().getState();
         Optional<OAuth2AuthorizeRequestState> requestState = authorizeRequestStateRepository
-                .findById(authenticationResult.getAuthorizationExchange().getAuthorizationRequest().getState());
+                .findById(state);
 
         if(requestState.isEmpty()) {
             UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(authorizationRequest.getRedirectUri())
@@ -167,9 +174,21 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
             return;
         }
 
+        authorizeRequestStateRepository.deleteById(state);
+
         String uid = requestState.get().getUid();
 
-        OAuth2AuthenticationToken authorizedToken = new OAuth2AuthenticationToken(authenticationResult.getClientRegistration(), authenticationResult.getAuthorizationExchange());
+        // Need to use generic token verifier that can verify tokens from different oauth provider
+        // Check for audience as well
+        Claims claims = idTokenVerifier.getClaims(
+                (String) authenticationResult.getAdditionalParameters().get("id_token"));
+
+        OAuth2AuthenticationToken authorizedToken = new OAuth2AuthenticationToken(
+                claims,
+                authenticationResult.getClientRegistration(),
+                authenticationResult.getAuthorizationExchange(),
+                authenticationResult.getAccessToken(),
+                authenticationResult.getRefreshToken());
 
         this.connectorRegistryService.registerOAuthConnect(uid, authorizedToken);
         String redirectUrl = authorizationRequest.getRedirectUri();

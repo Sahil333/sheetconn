@@ -16,7 +16,7 @@ import com.sheetconn.connector.service.ConnectorRegistryService;
 @RequestMapping("v1/connector/")
 public class ConnectorRegistryController {
     
-    private ConnectorRegistryService connectorRegistry;
+    private final ConnectorRegistryService connectorRegistry;
 
     public ConnectorRegistryController(ConnectorRegistryService connectorRegistry) {
         this.connectorRegistry = connectorRegistry;

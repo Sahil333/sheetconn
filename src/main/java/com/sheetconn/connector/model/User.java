@@ -6,15 +6,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user_info")
 @Getter
+@Table(name = "user_info")
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     // We only use google provider as login provider and hence the same uid provided by google
     @Id
+    @Column(name = "uid")
     private String uid;
 
     @Column(name = "name")
