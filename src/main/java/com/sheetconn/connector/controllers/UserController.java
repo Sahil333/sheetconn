@@ -19,8 +19,8 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    @PutMapping
-    public void addUser(@RequestBody AddUserDto addUserDto) {
-        userService.addUser(addUserDto.getIdToken());
-    }
+//    @PutMapping
+//    public void addUser(@RequestBody AddUserDto addUserDto) {
+//        userService.addUser(addUserDto.getIdToken());
+//    }
 }

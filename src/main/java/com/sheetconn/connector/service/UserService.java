@@ -17,13 +17,9 @@ public class UserService {
         this.idTokenVerifier = idTokenVerifier;
     }
 
-    public void addUser(String idToken) {
-        // check for audience for appscript or other project client id
-        // 1048130131806-f0pbb31sj8cduou6b9jldnmqspl2sabd.apps.googleusercontent.com - AppScripts
-        Claims claims = idTokenVerifier.getClaims(idToken);
-
+    public void addUser(Claims claims) {
         if (claims == null) {
-            throw new RuntimeException("Access token verification failed");
+            throw new RuntimeException("Claims can not be null");
         }
 
         boolean isUserExists = userRepository.existsById(claims.getSubject());

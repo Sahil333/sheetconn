@@ -2,6 +2,8 @@ package com.sheetconn.connector.controllers;
 
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,11 +26,13 @@ public class ConnectorRegistryController {
 
     @PostMapping
     public void addPostgresConnector(@RequestBody PostgresConfig postgresConfig) {
-        connectorRegistry.registerPostgresConnector(postgresConfig, "1");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        connectorRegistry.registerPostgresConnector(postgresConfig, auth.getName());
     }
 
     @GetMapping
     public List<UserConnectorConfig> getConnectors() {
-        return connectorRegistry.getConfigs("1");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return connectorRegistry.getConfigs(auth.getName());
     }
 }

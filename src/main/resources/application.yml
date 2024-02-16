@@ -23,3 +23,15 @@ spring:
           google-sheets:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline
             token-uri: https://oauth2.googleapis.com/token
+
+jwt:
+  audience:
+    - 1048130131806-7hv8b0pnlobhlmpk5mj30jfui2nmei76.apps.googleusercontent.com
+    - 1048130131806-f0pbb31sj8cduou6b9jldnmqspl2sabd.apps.googleusercontent.com
+    - 407408718192.apps.googleusercontent.com # demo purpose need to be removed
+
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE

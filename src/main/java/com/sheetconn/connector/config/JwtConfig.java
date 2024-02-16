@@ -5,17 +5,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.Set;
 
 @Configuration
-@ConfigurationProperties(prefix = "spring.security.oauth2.client")
+@ConfigurationProperties(prefix = "jwt")
 @Getter
 @AllArgsConstructor
-public class ClientRegistrationConfig {
+public class JwtConfig {
 
-    Map<String, Map<String, String>> registration;
-    Map<String, Map<String, String>> provider;
-
+    private Set<String> audience;
 }
+
+

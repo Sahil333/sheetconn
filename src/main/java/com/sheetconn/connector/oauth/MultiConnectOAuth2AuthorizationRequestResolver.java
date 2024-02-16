@@ -6,6 +6,7 @@ import com.sheetconn.connector.repository.OAuth2AuthorizeRequestStateRepository;
 import com.sheetconn.connector.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -117,7 +118,8 @@ public class MultiConnectOAuth2AuthorizationRequestResolver implements OAuth2Aut
 
         OAuth2AuthorizeRequestState requestState;
         if(Objects.equals(redirectUriAction, "authorize")) {
-            Claims claims = googleIdTokenVerifier.getClaims(request.getParameter("id_token"));
+            Claims claims = ((ApplicationAuthenticationToken)
+                    SecurityContextHolder.getContext().getAuthentication()).getClaims();
             requestState = new OAuth2AuthorizeRequestState(
                     UUID.randomUUID().toString(),
                     claims.getSubject(),

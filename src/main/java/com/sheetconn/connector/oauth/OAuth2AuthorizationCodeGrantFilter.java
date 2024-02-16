@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthorizationCodeAuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -132,6 +133,7 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
 
     private void processAuthorizationResponse(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        // TODO: Use DB backed authorizationRequestRepository for horizontal scaling
         OAuth2AuthorizationRequest authorizationRequest = this.authorizationRequestRepository
                 .removeAuthorizationRequest(request, response);
         String registrationId = authorizationRequest.getAttribute(OAuth2ParameterNames.REGISTRATION_ID);
@@ -162,7 +164,7 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
             return;
         }
         // get uid from state
-        String state = authenticationResult.getAuthorizationExchange().getAuthorizationRequest().getState();
+        String state = request.getParameter("state");
         Optional<OAuth2AuthorizeRequestState> requestState = authorizeRequestStateRepository
                 .findById(state);
 
@@ -178,9 +180,10 @@ public class OAuth2AuthorizationCodeGrantFilter extends OncePerRequestFilter {
 
         String uid = requestState.get().getUid();
 
-        // Need to use generic token verifier that can verify tokens from different oauth provider
-        // Check for audience as well
-        Claims claims = idTokenVerifier.getClaims(
+        // TODO: Need to use generic token verifier that can verify tokens from different oauth provider
+        // TODO: Check for audience as well
+        // TODO: Check all requested scopes are provided
+        Claims claims = idTokenVerifier.tokenValidation(
                 (String) authenticationResult.getAdditionalParameters().get("id_token"));
 
         OAuth2AuthenticationToken authorizedToken = new OAuth2AuthenticationToken(

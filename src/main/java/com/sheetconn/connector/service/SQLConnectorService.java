@@ -24,11 +24,11 @@ public class SQLConnectorService {
         }
 
         try (PostgresConnector connector = new PostgresConnector(
-            config.getConnectorConfig().get("host").asText(),
-            config.getConnectorConfig().get("port").asInt(),
-            config.getConnectorConfig().get("database").asText(),
-            config.getConnectorConfig().get("user").asText(),
-            config.getConnectorConfig().get("password").asText()
+            config.getConnectorConfig().get(ConnectorConfigConstants.Postgres.HOST).asText(),
+            config.getConnectorConfig().get(ConnectorConfigConstants.Postgres.PORT).asInt(),
+            config.getConnectorConfig().get(ConnectorConfigConstants.Postgres.DATABASE).asText(),
+            config.getConnectorConfig().get(ConnectorConfigConstants.Postgres.USER).asText(),
+            config.getConnectorConfig().get(ConnectorConfigConstants.Postgres.PASSWORD).asText()
         )) {
             return connector.runSimpleQuery(query);
         }

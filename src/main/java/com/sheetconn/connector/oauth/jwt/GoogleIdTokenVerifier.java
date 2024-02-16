@@ -1,44 +1,36 @@
 package com.sheetconn.connector.oauth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sheetconn.connector.expceptions.InvalidAudienceException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.apache.commons.collections4.SetUtils;
 
-@Component
+import java.util.Set;
+
 @Slf4j
 public class GoogleIdTokenVerifier {
 
     private final GoogleSigningKeyLocator keyLocator;
+    private final Set<String> audiences;
 
-    GoogleIdTokenVerifier(ObjectMapper mapper) {
+    public GoogleIdTokenVerifier(ObjectMapper mapper, Set<String> audiences) {
         this.keyLocator = new GoogleSigningKeyLocator(mapper);
+        this.audiences = audiences;
     }
 
-    public boolean isTokenValid(String idToken) {
-        boolean valid = false;
-        try {
-            Jwts.parser().keyLocator(keyLocator)
-                    .requireIssuer("https://accounts.google.com")
-                    .build()
-                    .parse(idToken);
-            valid = true;
-        } catch (Exception e) {
-            log.error("Failed to verify the token validity - ", e);
+    public Claims tokenValidation(String idToken) {
+        Claims claims = (Claims) Jwts.parser().keyLocator(keyLocator)
+                .requireIssuer("https://accounts.google.com")
+                .build()
+                .parse(idToken)
+                .getPayload();
+        if(SetUtils.intersection(audiences, claims.getAudience()).isEmpty()) {
+            throw new InvalidAudienceException("The target audience is not this application");
         }
-        return valid;
-    }
-
-    public Claims getClaims(String idToken) {
-        try {
-            return (Claims) Jwts.parser().keyLocator(keyLocator)
-                    .requireIssuer("https://accounts.google.com")
-                    .build()
-                    .parse(idToken)
-                    .getPayload();
-        } catch (Exception e) {
-            return null;
-        }
+        return claims;
     }
 }

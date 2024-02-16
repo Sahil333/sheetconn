@@ -9,7 +9,8 @@ public class SQLImportRequest {
 
     String workbookId;
     String sheetId;
-    String provider;
+    SheetProvider provider;
     String connectorId;
     String query;
+    String range;
 }

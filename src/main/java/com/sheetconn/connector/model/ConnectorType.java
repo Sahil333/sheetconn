@@ -1,18 +1,19 @@
 package com.sheetconn.connector.model;
 
+import lombok.Getter;
+
+@Getter
 public enum ConnectorType {
     
-    POSTGRESQL("postgresql"),
-    GOOGLE_SHEETS("google-sheets");
+    POSTGRESQL("postgresql", false),
+    GOOGLE_SHEETS("google-sheets", true);
 
     private String connectorType;
+    private Boolean isOAuth;
 
-    ConnectorType(String connectorType) {
+    ConnectorType(String connectorType, Boolean isOAuth) {
         this.connectorType = connectorType;
-    }
-
-    public String getConnectorType() {
-        return connectorType;
+        this.isOAuth = isOAuth;
     }
 
     public static ConnectorType getConnectorTypeFromName(String connectorName) {
