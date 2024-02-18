@@ -1,6 +1,8 @@
 package com.sheetconn.connector.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -45,5 +47,10 @@ public class GeneralConfigs {
         }
 
         return new InMemoryClientRegistrationRepository(clientRegistrations);
+    }
+
+    @Bean
+    HttpTransport httpTransport() {
+        return new NetHttpTransport();
     }
 }

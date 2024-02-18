@@ -85,7 +85,7 @@ public class ConnectorRegistryService {
         connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN, authenticationToken.getRefreshToken().getTokenValue());
 
         if (authenticationToken.getRefreshToken().getExpiresAt() == null) {
-            connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT, Long.MAX_VALUE);
+            connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT, Instant.MAX.getEpochSecond());
         } else {
             connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT, authenticationToken.getRefreshToken().getExpiresAt().getEpochSecond());
         }
@@ -144,7 +144,7 @@ public class ConnectorRegistryService {
         for(UserConnectorConfig config : configs) {
             if(config.getConnectorConfig().get(ConnectorConfigConstants.OAuth.SUBJECT).asText()
                     .equals(userId)) {
-                return buildOAuthClient(config);
+                return fetchOAuth2AuthorizedClient(config);
             }
         }
 
@@ -158,11 +158,15 @@ public class ConnectorRegistryService {
             throw new UserConnectorConfigNotFoundException("Connector config not found for exception");
         }
 
-        if(!config.get().getType().getIsOAuth()) {
+        return fetchOAuth2AuthorizedClient(config.get());
+    }
+
+    public OAuth2AuthorizedClient fetchOAuth2AuthorizedClient(UserConnectorConfig config) {
+        if(!config.getType().getIsOAuth()) {
             throw new IllegalArgumentException("Provided connector is not OAuth type");
         }
 
-        JsonNode connectorConfig = config.get().getConnectorConfig();
+        JsonNode connectorConfig = config.getConnectorConfig();
 
         long accessTokenExpiresAt = connectorConfig.get(ConnectorConfigConstants.OAuth.ACCESS_TOKEN_EXPIRES_AT).asLong();
         long refreshTokenExpiresAt = connectorConfig.get(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT).asLong();
@@ -170,14 +174,14 @@ public class ConnectorRegistryService {
         // 5 minutes buffer till expiry of access token
         if(accessTokenExpiresAt < ZonedDateTime.now(ZoneId.of("Z")).toEpochSecond() - 300) {
             if(refreshTokenExpiresAt < ZonedDateTime.now(ZoneId.of("Z")).toEpochSecond() - 10) {
-                connectorConfigRepository.deleteById(connectorId);
+                connectorConfigRepository.deleteById(config.getId());
                 throw new RefreshTokenExpiredException("Refresh token has expired, please re-authorize");
             } else {
-                refreshAccessToken(config.get());
+                refreshAccessToken(config);
             }
         }
 
-        return buildOAuthClient(config.get());
+        return buildOAuthClient(config);
     }
 
     public void refreshAccessToken(UserConnectorConfig config) {
@@ -206,7 +210,7 @@ public class ConnectorRegistryService {
         connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN, accessTokenResponse.getRefreshToken().getTokenValue());
 
         if (accessTokenResponse.getRefreshToken().getExpiresAt() == null) {
-            connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT, Long.MAX_VALUE);
+            connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT, Instant.MAX.getEpochSecond());
         } else {
             connectorConfig.put(ConnectorConfigConstants.OAuth.REFRESH_TOKEN_EXPIRES_AT, accessTokenResponse.getRefreshToken().getExpiresAt().getEpochSecond());
         }

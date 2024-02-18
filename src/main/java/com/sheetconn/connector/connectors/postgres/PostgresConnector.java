@@ -29,13 +29,13 @@ public class PostgresConnector implements AutoCloseable {
 
     private void connect(String host, Integer port, String database, String user, String pwd) {
         try {
-            DriverManager.setLoginTimeout(10);
+            DriverManager.setLoginTimeout(300);
             connection = DriverManager.getConnection(
                 buildUrl(host, port, database), user, pwd);
         } catch (SQLTimeoutException e) {
             throw new ConnectTimeoutException();
         } catch (SQLException e) {
-            
+            throw new RuntimeException(e);
         }
     }
 
@@ -45,8 +45,8 @@ public class PostgresConnector implements AutoCloseable {
             + ":"
             + port.toString()
             + "/"
-            + database
-            + "&sslmode=verify-full&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory";
+            + database;
+//            + "&sslmode=verify-full&sslfactory=org.postgresql.ssl.DefaultJavaSSLFactory";
     }
 
     public SchemaResult fetchSchema() {
@@ -92,18 +92,18 @@ public class PostgresConnector implements AutoCloseable {
                 
                 statement.setFetchSize(5000);
                 int count = 0;
-                List<List<String>> data = new LinkedList<>();
+                List<List<Object>> data = new LinkedList<>();
                 List<Column> columns = new ArrayList<>();
                 try (ResultSet resultSet = statement.executeQuery(readQuery)) {
                     ResultSetMetaData metaData = resultSet.getMetaData();
-                    for(int i=1; i<metaData.getColumnCount(); ++i) {
-                        columns.add(new Column(metaData.getColumnName(i), metaData.getColumnType(i)));
+                    for(int i=1; i<=metaData.getColumnCount(); ++i) {
+                        columns.add(new Column(metaData.getColumnName(i), metaData.getColumnType(i), metaData.getColumnClassName(i)));
                     }
                     while (resultSet.next() && count < ROW_LIMIT) {
                         ++count;
-                        List<String> rowData = new ArrayList<>(metaData.getColumnCount());
+                        List<Object> rowData = new ArrayList<>(metaData.getColumnCount());
                         for(int i=1; i<=metaData.getColumnCount(); ++i) {
-                            rowData.set(i-1, resultSet.getString(i));
+                            rowData.add(resultSet.getObject(i));
                         }
                         data.add(rowData);
                     }

@@ -9,5 +9,5 @@ import lombok.Setter;
 @Setter
 public class QueryResult {
     List<Column> columns;
-    List<List<String>> data;
+    List<List<Object>> data;
 }

@@ -1,6 +1,5 @@
 package com.sheetconn.connector.oauth;
 
-import com.sheetconn.connector.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthorizationCodeAuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;

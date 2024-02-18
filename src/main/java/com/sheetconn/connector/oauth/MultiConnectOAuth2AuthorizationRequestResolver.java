@@ -3,7 +3,6 @@ package com.sheetconn.connector.oauth;
 import com.sheetconn.connector.model.OAuth2AuthorizeRequestState;
 import com.sheetconn.connector.oauth.jwt.GoogleIdTokenVerifier;
 import com.sheetconn.connector.repository.OAuth2AuthorizeRequestStateRepository;
-import com.sheetconn.connector.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;

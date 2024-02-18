@@ -2,7 +2,6 @@ package com.sheetconn.connector.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

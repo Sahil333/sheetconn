@@ -1,5 +1,6 @@
 package com.sheetconn.connector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
@@ -29,6 +30,7 @@ public class UserConnectorConfig {
     
     @ManyToOne
     @JoinColumn(name = "uid")
+    @JsonIgnore
     private User user;
 
     @Column(name = "type")

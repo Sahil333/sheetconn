@@ -15,7 +15,7 @@ import com.sheetconn.connector.model.UserConnectorConfig;
 import com.sheetconn.connector.service.ConnectorRegistryService;
 
 @RestController
-@RequestMapping("v1/connector/")
+@RequestMapping("v1/connector")
 public class ConnectorRegistryController {
     
     private final ConnectorRegistryService connectorRegistry;
@@ -30,6 +30,8 @@ public class ConnectorRegistryController {
         connectorRegistry.registerPostgresConnector(postgresConfig, auth.getName());
     }
 
+
+    // TODO: only send back meta info on connectors, no sensitive credentials should be send back
     @GetMapping
     public List<UserConnectorConfig> getConnectors() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
