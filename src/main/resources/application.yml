@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/workbookDb
     username: test_user
-    password: test_pwd
+    password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,8 +14,8 @@ spring:
       client:
         registration:
           google-sheets:
-            client-id: 1048130131806-7hv8b0pnlobhlmpk5mj30jfui2nmei76.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/oauth/redirect/google-sheets"
             scope: https://www.googleapis.com/auth/spreadsheets,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile
@@ -25,10 +25,7 @@ spring:
             token-uri: https://oauth2.googleapis.com/token
 
 jwt:
-  audience:
-    - 1048130131806-7hv8b0pnlobhlmpk5mj30jfui2nmei76.apps.googleusercontent.com
-    - 1048130131806-f0pbb31sj8cduou6b9jldnmqspl2sabd.apps.googleusercontent.com
-    - 407408718192.apps.googleusercontent.com # demo purpose need to be removed
+  audience: ${GOOGLE_OAUTH_AUDIENCES:${GOOGLE_OAUTH_CLIENT_ID}}
 
 logging:
   level:
